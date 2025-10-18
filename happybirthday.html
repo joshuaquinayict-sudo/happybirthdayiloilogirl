@@ -18,7 +18,7 @@
             touch-action: manipulation;
              background: linear-gradient(135deg, #f9a8d4, #f3e8ff);
         }
-
+        
         #app {
             position: relative;
             width: 100%;
@@ -165,6 +165,7 @@
             height: 100%;
             z-index: 1;
         }
+        
     </style>
 </head>
 
@@ -190,8 +191,8 @@
                 <div class="emoji">🎉</div>
                 <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gradient">Happy Birthday!</h2>
                 <p class="text-lg text-gray-700 mb-6">
-                    On your special day, Gusto ko lang sabihin na happy birthday BWHAHAHAHAAH, you are fun to
-                    talk with and you are a very cool person ngl. Sana humaba pa ang buhay mo.
+                    Happy birthday tols, sana sumaya ang araw mo legit oo. If hindi mo pa nac-click, meron akong
+                    nilagay na audio ha BWHAHAAHAAHAHAHA. Sige na, i next mo na.
                 </p>
                 <button class="btn" id="next-btn-2">i-click ang button</button>
             </div>
@@ -244,12 +245,21 @@
                     May you get everything that you always wanted. 
                 </p>
                 <p class="text-xl font-semibold text-pink-600 mb-8">
-                    Happy Birthday, iloilo girl "sana masabi na sakin yung name niya bwhaahhaah"! ❤️
+                    Happy Birthday, Jheneicah! ❤️
                 </p>
                 <button class="btn" id="confetti-btn">Click mo to! May effect na maangas.</button>
                 <p class="mt-8 text-gray-500">made with chatgpt and openai BWHAAHAHAHAAAHAHA joke, made with sipag and tiyaga sa vscode and github</p>
             </div>
         </div>
+
+        <!-- Background audio element (looped) -->
+        <audio id="bg-audio" src="abba.mp3" preload="auto" loop></audio>
+
+        <!-- Larger Audio toggle button with text -->
+        <button id="audio-toggle" class="btn" style="position:fixed; top:16px; right:16px; padding:12px 18px; border-radius:12px; font-size:16px; display:flex; align-items:center; gap:10px; z-index:200;">
+            <span id="audio-toggle-icon">🔈</span>
+            <span id="audio-toggle-text">click this to turn on audio</span>
+        </button>
     </div>
 
     <script>
@@ -400,6 +410,7 @@
         document.getElementById('start-btn').addEventListener('click', () => {
             currentStep = 2;
             showStep(currentStep);
+            startAudioOnce();
         });
 
         document.getElementById('next-btn-2').addEventListener('click', () => {
@@ -474,6 +485,54 @@
                 });
             });
         });
+
+        // --- Begin audio controls ---
+        const bgAudio = document.getElementById('bg-audio');
+        const audioToggle = document.getElementById('audio-toggle');
+        const audioIcon = document.getElementById('audio-toggle-icon');
+        const audioLabel = document.getElementById('audio-toggle-text');
+        if (bgAudio) bgAudio.volume = 0.6;
+        let audioStarted = false;
+
+        function setAudioUI(state) {
+            if (!audioIcon || !audioLabel) return;
+            if (state === 'playing') {
+                audioIcon.textContent = '🔊';
+                audioLabel.textContent = 'click to mute audio';
+            } else {
+                audioIcon.textContent = '🔈';
+                audioLabel.textContent = 'click this to turn on audio';
+            }
+        }
+
+        function startAudioOnce() {
+            if (audioStarted || !bgAudio) return;
+            bgAudio.play().then(() => {
+                audioStarted = true;
+                setAudioUI('playing');
+            }).catch(() => {
+                setAudioUI('paused');
+            });
+        }
+
+        // Try to start on first user gesture (helps with autoplay policies)
+        ['click', 'touchstart', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, startAudioOnce, { once: true, passive: true });
+        });
+
+        // Toggle button behavior
+        if (audioToggle) {
+            audioToggle.addEventListener('click', () => {
+                if (!bgAudio) return;
+                if (bgAudio.paused) {
+                    bgAudio.play().then(() => setAudioUI('playing')).catch(() => setAudioUI('paused'));
+                } else {
+                    bgAudio.pause();
+                    setAudioUI('paused');
+                }
+            });
+        }
+        // --- End audio controls ---
 
         // Initialize progress bar
         updateProgressBar();
